@@ -1,5 +1,13 @@
 
 services:
+  go-app:
+    container_name: go-app
+    image: products-api
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - products_db
   products_db:
     container_name: products_db
     image: postgres:12

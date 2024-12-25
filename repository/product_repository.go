@@ -66,32 +66,30 @@ func (pr *ProductRepository) SaveProduct(product model.Product) (int, error) {
 	return id, nil
 }
 
-func (pr *ProductRepository) GetProductById(productId int) ([]model.Product, error) {
-	query := "SELECT id, product_name, price FROM product WHERE id = productId"
-	row, err := pr.connection.Query(query)
+func (pr *ProductRepository) GetProductById(productId int) (*model.Product, error) {
+
+	query, err := pr.connection.Prepare("SELECT id, product_name, price FROM product WHERE id = $1")
 	if err != nil {
 		fmt.Println(err)
-		return []model.Product{}, err
+		return nil, err
 	}
 
-	var productList []model.Product
-	var productObj model.Product
+	var product model.Product
 
-	for row.Next() {
-		err = row.Scan(
-			&productObj.Id,
-			&productObj.Name,
-			&productObj.Price,
-		)
-		if err != nil {
-			fmt.Println(err)
-			return []model.Product{}, err
+	err = query.QueryRow(productId).Scan(
+		&product.Id,
+		&product.Name,
+		&product.Price,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
 		}
-
-		productList = append(productList, productObj)
+		return nil, err
 	}
 
-	row.Close()
+	query.Close()
 
-	return productList, nil
+	return &product, nil
+
 }

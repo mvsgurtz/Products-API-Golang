@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	host     = "localhost"
+	host     = "products_db"
 	port     = 5432
 	user     = "postgres"
 	password = "1234"

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"products-api/model"
 	"products-api/usecase"
+	"strconv"
 )
 
 type productController struct {
@@ -41,4 +42,33 @@ func (p *productController) SaveProduct(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, insertedProduct)
+}
+
+func (p *productController) GetProductById(ctx *gin.Context) {
+
+	id := ctx.Param("productId")
+
+	if id == "" {
+		ctx.JSON(http.StatusBadRequest, model.Response{Message: "Id not exist"})
+		return
+	}
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, model.Response{Message: "Id need to be a number"})
+		return
+	}
+
+	product, err := p.productUseCase.GetProductById(productId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, err)
+	}
+
+	if product == nil {
+		ctx.JSON(http.StatusNotFound, model.Response{Message: "Product not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, product)
+
 }
